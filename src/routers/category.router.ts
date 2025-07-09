@@ -3,7 +3,7 @@ import { CreateCategorySchema, UpdateCategorySchema, CategoryResponseSchema } fr
 import { Container } from "../config/container";
 import { ZodError } from "zod";
 
-export async function categoryRoutes(fastify: FastifyInstance) {
+export async function categoryRouter(fastify: FastifyInstance) {
     const categoryController = Container.getCategoryController();
 
     await fastify.register(
@@ -16,6 +16,7 @@ export async function categoryRoutes(fastify: FastifyInstance) {
                         const category = await categoryController.createCategory(data);
                         reply.status(201).send(category);
                     } catch (error) {
+                        request.log.error(error);
                         if (error instanceof ZodError) {
                             reply.status(400).send({ error: error.errors });
                         } else {
@@ -32,6 +33,7 @@ export async function categoryRoutes(fastify: FastifyInstance) {
                         const categories = await categoryController.findAllCategories();
                         reply.send(categories);
                     } catch (error) {
+                        request.log.error(error);
                         reply.status(500).send({ error: "Internal Server Error" });
                     }
                 }
@@ -49,6 +51,7 @@ export async function categoryRoutes(fastify: FastifyInstance) {
                             reply.send(category);
                         }
                     } catch (error) {
+                        request.log.error(error);
                         reply.status(500).send({ error: "Internal Server Error" });
                     }
                 }
@@ -67,6 +70,7 @@ export async function categoryRoutes(fastify: FastifyInstance) {
                             reply.send(updatedCategory);
                         }
                     } catch (error) {
+                        request.log.error(error);
                         if (error instanceof ZodError) {
                             reply.status(400).send({ error: error.errors });
                         } else {
@@ -82,12 +86,9 @@ export async function categoryRoutes(fastify: FastifyInstance) {
                     const { id } = request.params as { id: string };
                     try {
                         const deleted = await categoryController.deleteCategory(id);
-                        if (!deleted) {
-                            reply.status(404).send({ error: "Category not found" });
-                        } else {
-                            reply.status(204).send();
-                        }
+                        reply.status(204).send();
                     } catch (error) {
+                        request.log.error(error);
                         reply.status(500).send({ error: "Internal Server Error" });
                     }
                 }

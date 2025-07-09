@@ -3,7 +3,7 @@ import { CreateProductSchema } from '../schemas/product.schema';
 import { Container } from '../config/container';
 import { ZodError } from 'zod';
 
-export async function productRoutes(fastify: FastifyInstance) {
+export async function productRouter(fastify: FastifyInstance) {
     const productController = Container.getProductController();
 
     await fastify.register(

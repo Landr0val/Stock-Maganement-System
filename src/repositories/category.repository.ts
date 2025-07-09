@@ -12,7 +12,7 @@ export class CategoryRepository {
     async create(data: CreateCategoryInput): Promise<CategoryResponse> {
         const id = ulid();
         const query = data.parentId
-            ? `INSERT INTO public.categories (id, name, description, parent_id) VALUES ($1, $2, $3, $4) RETURNING id, name, description, created_at, updated_at`
+            ? `INSERT INTO public.categories (id, name, description, parent_id) VALUES ($1, $2, $3, $4) RETURNING id, name, description, parent_id, created_at, updated_at`
             : `INSERT INTO public.categories (id, name, description) VALUES ($1, $2, $3) RETURNING id, name, description, created_at, updated_at`;
         const values = data.parentId
             ? [
@@ -23,12 +23,12 @@ export class CategoryRepository {
               ]
             : [id, data.name, data.description];
         const category = await this.db.query(query, values);
-        return category.rows[0];
+        return category[0];
     }
 
     async findAll(): Promise<CategoryResponse[]> {
         const categories = await this.db.query(
-            "SELECT name, description, parend_id, created_at, updated_at FROM public.categories",
+            "SELECT id, name, description, parent_id, created_at, updated_at FROM public.categories",
         );
         return categories;
     }
@@ -57,7 +57,7 @@ export class CategoryRepository {
         const setClause = fieldsToUpdate
             .map((field, index) => `${field} = $${index + 2}`)
             .join(", ");
-        const query = `UPDATE public.categories SET ${setClause}, updated_at = $${fieldsToUpdate.length + 2} WHERE id = $1 RETURNING id, name, description, parend_id, created_at, updated_at`;
+        const query = `UPDATE public.categories SET ${setClause}, updated_at = $${fieldsToUpdate.length + 2} WHERE id = $1 RETURNING id, name, description, parent_id, created_at, updated_at`;
 
         const category = await this.db.query(query, [
             id,
@@ -69,17 +69,14 @@ export class CategoryRepository {
             throw new Error(`Category with id ${id} not found`);
         }
 
-        return category.rows[0];
+        return category[0];
     }
 
     async delete(id: string): Promise<boolean> {
         const deleted = await this.db.query(
-            `DELETE FROM public.category WHERE = $1`,
+            `DELETE FROM public.categories WHERE id = $1`,
             [id],
         );
-        if (!deleted) {
-            throw new Error(`Category id ${id} not found`);
-        }
         return deleted > 0;
     }
 }

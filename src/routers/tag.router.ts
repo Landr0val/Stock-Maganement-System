@@ -3,7 +3,7 @@ import { CreateTagSchema, UpdateTagSchema, TagResponseSchema } from "../schemas/
 import { Container } from "../config/container";
 import { ZodError } from "zod";
 
-export async function tagRoutes(fastify: FastifyInstance) {
+export async function tagRouter(fastify: FastifyInstance) {
     const tagController = Container.getTagController();
 
     await fastify.register(

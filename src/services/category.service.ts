@@ -4,8 +4,8 @@ import { CategoryRepository } from "../repositories/category.repository";
 export class CategoryService {
     constructor(private readonly repository: CategoryRepository) { }
 
-    async createCategory(input: CreateCategoryInput): Promise<CategoryResponse> {
-        const category = await this.repository.create(input);
+    async createCategory(data: CreateCategoryInput): Promise<CategoryResponse> {
+        const category = await this.repository.create(data);
         return category;
     }
 
