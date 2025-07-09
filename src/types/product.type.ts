@@ -1,6 +1,6 @@
-import { CreateCategorySchema, UpdateCategorySchema, CategoryResponseSchema } from "../schemas/category.schema";
+import { CreateProductSchema, UpdateProductSchema, ProductResponseSchema } from "../schemas/product.schema";
 import { z } from "zod";
 
-export type CreateCategoryInput = z.infer<typeof CreateCategorySchema>;
-export type UpdateCategoryInput = z.infer<typeof UpdateCategorySchema>;
-export type CategoryResponse = z.infer<typeof CategoryResponseSchema>;
+export type CreateProductInput = z.infer<typeof CreateProductSchema>;
+export type UpdateProductInput = z.infer<typeof UpdateProductSchema>;
+export type ProductResponse = z.infer<typeof ProductResponseSchema>;
