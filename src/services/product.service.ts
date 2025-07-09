@@ -38,10 +38,11 @@ export class ProductService {
         return updatedProduct;
     }
 
-    async deleteProduct(id: string): Promise<void> {
+    async deleteProduct(id: string): Promise<boolean> {
         const deleted = await this.repository.delete(id);
         if (!deleted) {
             throw new Error(`Product with id ${id} not found`);
         }
+        return deleted;
     }
 }

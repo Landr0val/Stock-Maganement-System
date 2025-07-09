@@ -3,6 +3,11 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "build": "bun build index.ts --outdir dist --target node",
+    "start": "bun run build && bun run start:prod",
+    "dev": "bun --watch --hot src/server.ts"
+  },
   "devDependencies": {
     "@types/bun": "^1.2.18"
   },
@@ -10,6 +15,7 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "@fastify/bearer-auth": "^10.1.1",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/pg": "^8.15.4",
     "fastify": "^5.4.0",
