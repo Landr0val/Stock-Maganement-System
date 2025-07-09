@@ -21,7 +21,7 @@ export class ProductRepository {
     async findAll(options: {
         page: number;
         limit: number;
-        filters?: { category: string; tag: string }
+        filters?: { category?: string; tag?: string }
     }): Promise<{
         products: ProductResponse[];
         total: number;
