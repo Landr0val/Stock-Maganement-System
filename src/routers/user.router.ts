@@ -11,8 +11,8 @@ export async function userRouter(fastify: FastifyInstance) {
             fastify.post(
                 "/",
                 async (request: FastifyRequest, reply: FastifyReply) => {
-                    const data = CreateUserSchema.parse(request.body);
-                    await userController.createUser(data, request, reply);
+                    const validatedBody = CreateUserSchema.parse(request.body);
+                    await userController.createUser(validatedBody, request, reply);
                 }
             );
 
@@ -50,8 +50,7 @@ export async function userRouter(fastify: FastifyInstance) {
                     reply: FastifyReply
                 ) => {
                     const { id } = request.params as { id: string };
-                    const data = UpdateUserSchema.parse(request.body);
-                    await userController.updateUser(id, data, request, reply);
+                    await userController.updateUser(id, request.body, request, reply);
                 }
             )
 

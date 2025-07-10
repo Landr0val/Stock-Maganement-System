@@ -1,5 +1,6 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import type { CreateUserInput, UpdateUserInput, UserResponse } from "../types/user.type";
+import { CreateUserSchema, UpdateUserSchema } from "../schemas/user.schema";
 import { UserService } from "../services/user.service";
 import { ZodError } from "zod";
 
@@ -7,23 +8,31 @@ export class UserController {
     constructor(private readonly service: UserService) {}
 
     async createUser(data: CreateUserInput, request: FastifyRequest, reply: FastifyReply): Promise<void> {
-        try {
-            const user = await this.service.createUser(data);
-            reply.status(201).send(user);
-        } catch (error) {
-            request.log.error(error);
-            if (error instanceof ZodError){
-                reply.status(400).send({
-                    message: "Validation error",
-                    errors: error.errors,
-                });
-            } else if (error instanceof Error && error.message.includes("already exists")) {
-                reply.status(409).send({ error: error.message });
-            } else {
-                reply.status(500).send({ error: "Internal Server Error" });
+            try {
+                const validatedData = CreateUserSchema.parse(data);
+                // request.log.info(validatedData);
+                if (validatedData.phone_number < 1000000000) {
+                    return reply.status(422).send({
+                        error: "Phone number must be at least 10 digits"
+                    });
+                }
+
+                const user = await this.service.createUser(validatedData);
+                reply.status(201).send(user);
+            } catch (error) {
+                request.log.error(error);
+                if (error instanceof ZodError) {
+                    reply.status(400).send({
+                        message: "Validation error",
+                        errors: error.errors,
+                    });
+                } else if (error instanceof Error && error.message.includes("already exists")) {
+                    reply.status(409).send({ error: error.message });
+                } else {
+                    reply.status(500).send({ error: "Internal Server Error" });
+                }
             }
         }
-    }
 
     async findAllUsers(options: {
         page: number;
@@ -57,24 +66,32 @@ export class UserController {
         }
     }
 
-    async updateUser(id: string, data: UpdateUserInput, request: FastifyRequest, reply: FastifyReply): Promise<void> {
-        try {
-            const updatedUser = await this.service.updateUser(id, data);
-            reply.status(200).send(updatedUser);
-        } catch (error) {
-            request.log.error(error);
-            if (error instanceof ZodError) {
-                reply.status(400).send({
-                    message: "Validation error",
-                    errors: error.errors,
-                });
-            } else if (error instanceof Error && error.message.includes("not found")) {
-                reply.status(404).send({ error: error.message });
-            } else {
-                reply.status(500).send({ error: "Internal Server Error" });
+    async updateUser(id: string, data: any, request: FastifyRequest, reply: FastifyReply): Promise<void> {
+            try {
+                const validatedData = UpdateUserSchema.parse(data);
+
+                if (validatedData.phone_number && validatedData.phone_number < 1000000000) {
+                    return reply.status(422).send({
+                        error: "Phone number must be at least 10 digits"
+                    });
+                }
+
+                const updatedUser = await this.service.updateUser(id, validatedData);
+                reply.status(200).send(updatedUser);
+            } catch (error) {
+                request.log.error(error);
+                if (error instanceof ZodError) {
+                    reply.status(400).send({
+                        message: "Validation error",
+                        errors: error.errors,
+                    });
+                } else if (error instanceof Error && error.message.includes("not found")) {
+                    reply.status(404).send({ error: error.message });
+                } else {
+                    reply.status(500).send({ error: "Internal Server Error" });
+                }
             }
         }
-    }
 
     async deleteUser(id: string, request: FastifyRequest, reply: FastifyReply): Promise<void> {
         try {

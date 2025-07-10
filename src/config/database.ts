@@ -1,7 +1,7 @@
 import { Pool } from "pg";
 
 const types = require('pg').types;
-types.setTypeParser(20, (val: string) => BigInt(val));
+types.setTypeParser(20, (val: string) => parseInt(val));
 
 export class DatabasePool {
     private static instance: Pool;
