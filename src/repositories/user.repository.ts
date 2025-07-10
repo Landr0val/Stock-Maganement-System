@@ -67,11 +67,11 @@ export class UserRepository {
            };
        }
 
-    async findById(id: string): Promise<UserResponse | null> {
+    async findById(id: string): Promise<UserResponse> {
         const user = await this.db.query(
             "SELECT id, first_name, last_name, email, phone_number, role, created_at, updated_at FROM public.users WHERE id = $1",
             [id]
-        );
+        );;
         return user;
     }
 

@@ -23,26 +23,33 @@ export class UserService {
         totalPages: number;
     }> {
         const users = await this.repository.findAll(options);
+        if (!users || users.users.length === 0) {
+            throw new Error("No users found");
+        }
         return users;
     }
 
     async findUserById(id: string): Promise<UserResponse | null> {
         const user = await this.repository.findById(id);
-        if (!user) {
-            throw new Error(`User with id ${id} not found`);
+        if (!user || Object.keys(user).length === 0) {
+            throw new Error(`User not found`);
         }
         return user;
     }
 
     async updateUser(id: string, data: UpdateUserInput): Promise<UserResponse> {
         const user = await this.repository.update(id, data);
-        if (!user) {
-            throw new Error(`User with id ${id} not found`);
+        if (!user || Object.keys(user).length === 0) {
+            throw new Error(`User not found`);
         }
         return user;
     }
 
     async deleteUser(id: string): Promise<boolean> {
+        const user = await this.repository.findById(id);
+        if (!user || Object.keys(user).length === 0) {
+            throw new Error(`User not found`);
+        }
         const deleted = await this.repository.delete(id);
         return deleted;
     }
