@@ -111,14 +111,10 @@ export async function userRouter(fastify: FastifyInstance) {
                 async (request: FastifyRequest, reply: FastifyReply) => {
                     const { id } = request.params as { id: string };
                     try {
-                        const deleted = await userController.deleteUser(id);
-                        if (!deleted) {
-                            return reply.status(404).send({
-                                message: `User with id ${id} not found`,
-                            });
-                        }
+                        await userController.deleteUser(id);
                         reply.status(204).send();
                     } catch (error) {
+                        request.log.error(error);
                         reply.status(500).send({
                             message: "Internal server error",
                         });

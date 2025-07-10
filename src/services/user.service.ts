@@ -40,9 +40,6 @@ export class UserService {
 
     async deleteUser(id: string): Promise<boolean> {
         const deleted = await this.repository.delete(id);
-        if (!deleted) {
-            throw new Error(`User with id ${id} not found`);
-        }
         return deleted;
     }
 }
