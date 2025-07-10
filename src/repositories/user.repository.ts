@@ -80,6 +80,9 @@ export class UserRepository {
             "SELECT id, first_name, last_name, email, phone_number, role, created_at, updated_at FROM public.users WHERE email = $1",
             [email]
         );
+        if (user.length === 0) {
+            return null;
+        }
         return user;
     }
 

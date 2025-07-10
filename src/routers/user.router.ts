@@ -16,6 +16,7 @@ export async function userRouter(fastify: FastifyInstance) {
                         const user = await userController.createUser(data);
                         reply.status(201).send(user);
                     } catch (error) {
+                        request.log.error(error);
                         if (error instanceof ZodError) {
                             reply.status(400).send({
                                 message: "Validation error",
@@ -49,6 +50,7 @@ export async function userRouter(fastify: FastifyInstance) {
                         });
                         reply.status(200).send(users);
                     } catch (error) {
+                        request.log.error(error);
                         reply.status(500).send({
                             message: "Internal server error",
                         });
@@ -69,6 +71,7 @@ export async function userRouter(fastify: FastifyInstance) {
                         }
                         reply.status(200).send(user);
                     } catch (error) {
+                        request.log.error(error);
                         reply.status(500).send({
                             message: "Internal server error",
                         });
@@ -92,6 +95,7 @@ export async function userRouter(fastify: FastifyInstance) {
                         }
                         reply.status(200).send(user);
                     } catch (error) {
+                        request.log.error(error);
                         if (error instanceof ZodError) {
                             reply.status(400).send({
                                 message: "Validation error",
