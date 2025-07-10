@@ -12,25 +12,33 @@ export class TagRepository {
     async create(data: CreateTagInput): Promise<TagResponse> {
         const id = ulid();
         const tag = await this.db.query(
-            "INSERT INTO public.tag (id, name, description, created_at, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id, name, description, created_at, updated_at",
+            "INSERT INTO public.tags (id, name, description, created_at, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id, name, description, created_at, updated_at",
             [id, data.name, data.description, new Date(), new Date()],
         );
         return tag;
     }
 
     async findAll(): Promise<TagResponse[]> {
-        const tags = this.db.query(
+        const tags = await this.db.query(
             `SELECT id, name, description, created_at, updated_at FROM public.tags`,
         );
         return tags;
     }
 
-    async findById(id: string): Promise<TagResponse> {
-        const tag = this.db.query(
+    async findById(id: string): Promise<TagResponse | null> {
+        const tag = await this.db.query(
             `SELECT id, name, description, created_at, updated_at FROM public.tags WHERE id = $1`,
             [id],
         );
         return tag;
+    }
+
+    async findByName(name: string): Promise<TagResponse | null> {
+        const tag = await this.db.query(
+            `SELECT id, name, description, created_at, updated_at FROM public.tags WHERE name = $1`,
+            [name],
+        );
+        return tag.length > 0 ? tag[0] : null;
     }
 
     async update(id: string, data: UpdateTagInput): Promise<TagResponse> {
@@ -43,19 +51,14 @@ export class TagRepository {
         const setClause = fieldsToUpdate
             .map((field, index) => `${field} = $${index + 2}`)
             .join(", ");
-        const query = `UPDATE public.categories SET ${setClause}, updated_at = $${fieldsToUpdate.length + 2} WHERE id = $1 RETURNING id, name, description, parend_id, created_at, updated_at`;
+        const query = `UPDATE public.tags SET ${setClause} WHERE id = $1 RETURNING id, name, description, created_at, updated_at`;
 
         const tag = await this.db.query(query, [
             id,
-            ...valuesToUpdate,
-            new Date(),
+            ...valuesToUpdate
         ]);
 
-        if (!tag) {
-            throw new Error(`Tag with id ${id} not found`);
-        }
-
-        return tag.rows[0];
+        return tag[0];
     }
 
     async delete(id: string): Promise<boolean> {
@@ -63,9 +66,7 @@ export class TagRepository {
             "DELETE FROM public.tags WHERE id = $1",
             [id]
         );
-        if (!deleted) {
-            throw new Error(`Category id ${id} not f ound`);
-        }
+
         return deleted > 0;
     }
 }

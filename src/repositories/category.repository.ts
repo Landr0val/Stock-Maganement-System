@@ -23,7 +23,7 @@ export class CategoryRepository {
               ]
             : [id, data.name, data.description];
         const category = await this.db.query(query, values);
-        return category[0];
+        return category;
     }
 
     async findAll(): Promise<CategoryResponse[]> {
@@ -38,9 +38,6 @@ export class CategoryRepository {
             "SELECT name, description, parent_id, created_at, updated_at FROM public.categories WHERE id = $1",
             [id],
         );
-        if (!category || category.length === 0) {
-            throw new Error(`Category with id ${id} not found`);
-        }
         return category;
     }
 
@@ -64,10 +61,6 @@ export class CategoryRepository {
             ...valuesToUpdate,
             new Date(),
         ]);
-
-        if (!category) {
-            throw new Error(`Category with id ${id} not found`);
-        }
 
         return category[0];
     }

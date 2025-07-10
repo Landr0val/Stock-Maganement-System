@@ -11,49 +11,24 @@ export async function categoryRouter(fastify: FastifyInstance) {
             fastify.post(
                 "/",
                 async (request: FastifyRequest, reply: FastifyReply) => {
-                    try {
-                        const data = CreateCategorySchema.parse(request.body);
-                        const category = await categoryController.createCategory(data);
-                        reply.status(201).send(category);
-                    } catch (error) {
-                        request.log.error(error);
-                        if (error instanceof ZodError) {
-                            reply.status(400).send({ error: error.errors });
-                        } else {
-                            reply.status(500).send({ error: "Internal Server Error" });
-                        }
-                    }
+                    const data = CreateCategorySchema.parse(request.body);
+                    await categoryController.createCategory(data, request, reply);
+
                 }
             )
 
             fastify.get(
                 "/",
                 async (request: FastifyRequest, reply: FastifyReply) => {
-                    try {
-                        const categories = await categoryController.findAllCategories();
-                        reply.send(categories);
-                    } catch (error) {
-                        request.log.error(error);
-                        reply.status(500).send({ error: "Internal Server Error" });
-                    }
+                    await categoryController.findAllCategories(request, reply);
                 }
             )
 
             fastify.get(
                 "/:id",
                 async (request: FastifyRequest, reply: FastifyReply) => {
-                    try {
-                        const { id } = request.params as { id: string };
-                        const category = await categoryController.findCategoryById(id);
-                        if (!category) {
-                            reply.status(404).send({ error: "Category not found" });
-                        } else {
-                            reply.send(category);
-                        }
-                    } catch (error) {
-                        request.log.error(error);
-                        reply.status(500).send({ error: "Internal Server Error" });
-                    }
+                    const { id } = request.params as { id: string };
+                    await categoryController.findCategoryById(id, request, reply);
                 }
             )
 
@@ -61,22 +36,9 @@ export async function categoryRouter(fastify: FastifyInstance) {
                 "/:id",
                 async (request: FastifyRequest, reply: FastifyReply) => {
                     const { id } = request.params as { id: string };
-                    try {
-                        const data = UpdateCategorySchema.parse(request.body);
-                        const updatedCategory = await categoryController.updateCategory(id, data);
-                        if (!updatedCategory) {
-                            reply.status(404).send({ error: "Category not found" });
-                        } else {
-                            reply.send(updatedCategory);
-                        }
-                    } catch (error) {
-                        request.log.error(error);
-                        if (error instanceof ZodError) {
-                            reply.status(400).send({ error: error.errors });
-                        } else {
-                            reply.status(500).send({ error: "Internal Server Error" });
-                        }
-                    }
+
+                    const data = UpdateCategorySchema.parse(request.body);
+                    await categoryController.updateCategory(id, data, request, reply);
                 }
             )
 
@@ -84,13 +46,7 @@ export async function categoryRouter(fastify: FastifyInstance) {
                 "/:id",
                 async (request: FastifyRequest, reply: FastifyReply) => {
                     const { id } = request.params as { id: string };
-                    try {
-                        const deleted = await categoryController.deleteCategory(id);
-                        reply.status(204).send();
-                    } catch (error) {
-                        request.log.error(error);
-                        reply.status(500).send({ error: "Internal Server Error" });
-                    }
+                    await categoryController.deleteCategory(id, request, reply);
                 }
             )
         }, { prefix: "/categories" }

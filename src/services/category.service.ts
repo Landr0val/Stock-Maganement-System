@@ -19,8 +19,8 @@ export class CategoryService {
 
     async findCategoryById(id: string): Promise<CategoryResponse | null> {
         const category = await this.repository.findById(id);
-        if (!category) {
-            throw new Error(`Category with id ${id} not found`);
+        if (!category || Object.keys(category).length === 0) {
+            throw new Error(`Category not found`);
         }
         return category;
     }
@@ -30,16 +30,16 @@ export class CategoryService {
         data: UpdateCategoryInput,
     ): Promise<CategoryResponse> {
         const category = await this.repository.update(id, data);
-        if (!category) {
-            throw new Error(`Category with id ${id} not found`);
+        if (!category || Object.keys(category).length === 0) {
+            throw new Error(`Category not found`);
         }
         return category;
     }
 
     async deleteCategory(id: string): Promise<boolean> {
         const category = await this.repository.findById(id);
-        if (!category) {
-            throw new Error(`Category with id ${id} not found`);
+        if (!category || Object.keys(category).length === 0) {
+            throw new Error(`Category not found`);
         }
         return await this.repository.delete(id);
     }

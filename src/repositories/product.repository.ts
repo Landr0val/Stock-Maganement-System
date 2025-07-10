@@ -19,7 +19,7 @@ export class ProductRepository {
 
         const query = `INSERT INTO public.products (${fieldsToInsert.join(", ")}) VALUES (${fieldsToInsert.map((_, index) => `$${index + 1}`).join(", ")}) RETURNING id, name, description, price, created_at, updated_at`;
         const product = await this.db.query(query, valuesToInsert);
-        return product.rows[0];
+        return product[0];
     }
 
     async findAll(options: {
@@ -31,38 +31,61 @@ export class ProductRepository {
         total: number;
         totalPages: number;
     }> {
-        const offset = (options.page - 1) * options.limit;
+        try {
+            const offset = (options.page - 1) * options.limit;
 
-        const whereClauses: string[] = [];
-        const params: any[] = [];
-        const paramIndex = 1;
+            let whereClauses: string[] = [];
+            let params: any[] = [];
+            let paramIndex = 1;
 
-        if (options.filters?.category) {
-            whereClauses.push(`category_id = $${paramIndex}`);
-            params.push(options.filters.category);
+            if (options.filters?.category) {
+                whereClauses.push(`category_id = $${paramIndex}`);
+                params.push(options.filters.category);
+                paramIndex++;
+            }
+            if (options.filters?.tag) {
+                whereClauses.push(`tags_id @> ARRAY[$${paramIndex}]`);
+                params.push(options.filters.tag);
+                paramIndex++;
+            }
+
+            const whereClause =
+                whereClauses.length > 0
+                    ? `WHERE ${whereClauses.join(" AND ")}`
+                    : "";
+
+            const countQuery = `SELECT COUNT(*) as total FROM public.products ${whereClause}`;
+            const countParams = params.slice();
+            const countResult = await this.db.query(countQuery, countParams);
+            const total = parseInt(countResult[0].total);
+
+            const query = `SELECT id, name, description, stock, price, category_id, tags_id, created_at, updated_at FROM public.products ${whereClause} ORDER BY created_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+            const queryParams = [...params, options.limit, offset];
+            const result = await this.db.query(query, queryParams);
+
+            const products = result.map((row: any) => ({
+                id: row.id,
+                name: row.name,
+                description: row.description,
+                stock: Number(row.stock),
+                price: BigInt(row.price),
+                category_id: row.category_id,
+                tags: row.tags_id,
+                createdAt: new Date(row.created_at),
+                updatedAt: new Date(row.updated_at),
+            }));
+
+            const totalPages = Math.ceil(total / options.limit);
+
+            return {
+                products,
+                total,
+                totalPages,
+            };
+        } catch (error) {
+            console.error("Error in findAll:", error);
+            throw error;
         }
-        if (options.filters?.tag) {
-            whereClauses.push(`tags @> ARRAY[$${paramIndex + params.length}]`);
-            params.push(options.filters.tag);
-        }
-
-        const whereClause =
-            whereClauses.length > 0
-                ? `WHERE ${whereClauses.join(" AND ")}`
-                : "";
-        const query = `SELECT id, name, description, price, created_at, updated_at FROM public.products ${whereClause} ORDER BY created_at DESC LIMIT $${paramIndex + params.length} OFFSET $${paramIndex + params.length + 1}`;
-        params.push(options.limit, offset);
-        const result = await this.db.query(query, params);
-        const products = result.map((row: any) => {
-            const { total_count, ...products } = row;
-        });
-        const total = result.length > 0 ? parseInt(result[0].total_count) : 0;
-        const totalPages = Math.ceil(total / options.limit);
-        return {
-            products,
-            total,
-            totalPages,
-        };
     }
 
     async findById(id: string): Promise<ProductResponse | null> {
@@ -70,10 +93,16 @@ export class ProductRepository {
             "SELECT id, name, description, stock, price, category_id, tags_id, created_at, updated_at FROM public.products WHERE id = $1",
             [id],
         );
-        if (!product && product.length === 0) {
-            return null;
-        }
+
         return product[0];
+    }
+
+    async findByName(name: string): Promise<ProductResponse | null> {
+        const product = await this.db.query(
+            `SELECT name FROM public.products WHERE name = $1`,
+            [name],
+        );
+        return product.length > 0 ? product[0] : null;
     }
 
     async update(
@@ -83,21 +112,17 @@ export class ProductRepository {
         const filtered = Object.entries(data).filter(
             ([_, value]) => value != null,
         );
-        if (filtered.length === 0) {
-            return null;
-        }
-        const fieldsToUpdate = filtered.map(
-            ([key, _], index) => `${key} = $${index + 1}`,
-        );
+        const fieldsToUpdate = filtered.map(([key, _]) => key);
         const valuesToUpdate = filtered.map(([_, value]) => value);
-        valuesToUpdate.push(id);
 
-        const query = `UPDATE public.products SET ${fieldsToUpdate.join(", ")} WHERE id = $${valuesToUpdate.length} RETURNING id, name, description, stock, price, category_id, tags_id, created_at, updated_at`;
-        const result = await this.db.query(query, valuesToUpdate);
-        if (result.rows.length === 0) {
-            return null;
-        }
-        return result.rows[0];
+        const setClause = fieldsToUpdate
+            .map((field, index) => `${field} = $${index + 2}`)
+            .join(", ");
+        const query = `UPDATE public.products SET ${setClause} WHERE id = $1 RETURNING id, name, description, created_at, updated_at`;
+
+        const product = await this.db.query(query, [id, ...valuesToUpdate]);
+
+        return product[0];
     }
 
     async delete(id: string): Promise<boolean> {
@@ -105,6 +130,7 @@ export class ProductRepository {
             "DELETE FROM public.products WHERE id = $1 RETURNING id",
             [id],
         );
-        return result.rows.length > 0;
+
+        return result.length > 0;
     }
 }

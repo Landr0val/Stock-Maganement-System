@@ -11,46 +11,23 @@ export async function tagRouter(fastify: FastifyInstance) {
             fastify.post(
                 "/",
                 async (request: FastifyRequest, reply: FastifyReply) => {
-                    try {
-                        const data = CreateTagSchema.parse(request.body);
-                        const tag = await tagController.createTag(data);
-                        reply.status(201).send(tag);
-                    } catch (error) {
-                        if (error instanceof ZodError) {
-                            reply.status(400).send({ error: error.errors });
-                        } else {
-                            reply.status(500).send({ error: "Internal Server Error" });
-                        }
-                    }
+                    const data = CreateTagSchema.parse(request.body);
+                    await tagController.createTag(data, request, reply);
                 }
             )
 
             fastify.get(
                 "/",
                 async (request: FastifyRequest, reply: FastifyReply) => {
-                    try {
-                        const tags = await tagController.findAllTags();
-                        reply.send(tags);
-                    } catch (error) {
-                        reply.status(500).send({ error: "Internal Server Error" });
-                    }
+                    await tagController.findAllTags(request, reply)
                 }
             )
 
             fastify.get(
                 "/:id",
                 async (request: FastifyRequest, reply: FastifyReply) => {
-                    try {
-                        const { id } = request.params as { id: string };
-                        const tag = await tagController.findTagById(id);
-                        if (!tag) {
-                            reply.status(404).send({ error: "Tag not found" });
-                        } else {
-                            reply.send(tag);
-                        }
-                    } catch (error) {
-                        reply.status(500).send({ error: "Internal Server Error" });
-                    }
+                    const { id } = request.params as { id: string };
+                    await tagController.findTagById(id, request, reply);
                 }
             )
 
@@ -58,21 +35,8 @@ export async function tagRouter(fastify: FastifyInstance) {
                 "/:id",
                 async (request: FastifyRequest, reply: FastifyReply) => {
                     const { id } = request.params as { id: string };
-                    try {
-                        const data = UpdateTagSchema.parse(request.body);
-                        const updatedTag = await tagController.updateTag(id, data);
-                        if (!updatedTag) {
-                            reply.status(404).send({ error: "Tag not found" });
-                        } else {
-                            reply.send(updatedTag);
-                        }
-                    } catch (error) {
-                        if (error instanceof ZodError) {
-                            reply.status(400).send({ error: error.errors });
-                        } else {
-                            reply.status(500).send({ error: "Internal Server Error" });
-                        }
-                    }
+                    const data = UpdateTagSchema.parse(request.body);
+                    await tagController.updateTag(id, data, request, reply);
                 }
             )
 
@@ -80,18 +44,9 @@ export async function tagRouter(fastify: FastifyInstance) {
                 "/:id",
                 async (request: FastifyRequest, reply: FastifyReply) => {
                     const { id } = request.params as { id: string };
-                    try {
-                        const deletedTag = await tagController.deleteTag(id);
-                        if (!deletedTag) {
-                            reply.status(404).send({ error: "Tag not found" });
-                        } else {
-                            reply.status(204).send();
-                        }
-                    } catch (error) {
-                        reply.status(500).send({ error: "Internal Server Error" });
-                    }
+                    await tagController.deleteTag(id, request, reply);
                 }
             )
-        }
+        }, { prefix: "/tags" }
     )
 }

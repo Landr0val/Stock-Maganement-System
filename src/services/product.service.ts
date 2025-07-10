@@ -5,6 +5,10 @@ export class ProductService {
     constructor(private readonly repository: ProductRepository) {}
 
     async createProduct(data: CreateProductInput): Promise<ProductResponse> {
+        const existingProduct = await this.repository.findByName(data.name);
+        if (existingProduct) {
+            throw new Error(`Product with name ${data.name} already exists`);
+        }
         const product = await this.repository.create(data);
         return product;
     }
@@ -19,13 +23,16 @@ export class ProductService {
         totalPages: number;
     }> {
         const products = await this.repository.findAll(options);
+        if (!products || products.products.length === 0) {
+            throw new Error("No products found");
+        }
         return products;
     }
 
     async findProductById(id: string): Promise<ProductResponse | null> {
         const product = await this.repository.findById(id);
         if (!product) {
-            throw new Error(`Product with id ${id} not found`);
+            throw new Error(`Product not found`);
         }
         return product;
     }
@@ -33,16 +40,17 @@ export class ProductService {
     async updateProduct(id: string, data: UpdateProductInput): Promise<ProductResponse> {
         const updatedProduct = await this.repository.update(id, data);
         if (!updatedProduct) {
-            throw new Error(`Product with id ${id} not found`);
+            throw new Error(`Product not found`);
         }
         return updatedProduct;
     }
 
     async deleteProduct(id: string): Promise<boolean> {
-        const deleted = await this.repository.delete(id);
-        if (!deleted) {
-            throw new Error(`Product with id ${id} not found`);
+        const product = await this.repository.findById(id);
+        if (!product) {
+            throw new Error(`Product not found`);
         }
+        const deleted = await this.repository.delete(id);
         return deleted;
     }
 }
