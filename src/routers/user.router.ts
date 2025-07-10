@@ -76,7 +76,7 @@ export async function userRouter(fastify: FastifyInstance) {
                 }
             );
 
-            fastify.put(
+            fastify.patch(
                 "/:id",
                 async (request: FastifyRequest,
                     reply: FastifyReply

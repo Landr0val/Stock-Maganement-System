@@ -22,7 +22,7 @@ export const UserResponseSchema = z.object({
     first_name: z.string(),
     last_name: z.string(),
     email: z.string(),
-    phone_number: z.coerce.bigint(),
+    phone_number: z.bigint(),
     role: z.nativeEnum(UserRole),
     createdAt: z.date(),
     updatedAt: z.date(),

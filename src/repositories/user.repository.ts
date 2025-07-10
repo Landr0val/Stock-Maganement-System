@@ -106,7 +106,8 @@ export class UserRepository {
         const setClause = fieldsToUpdate
             .map((field, index) => `${field} = $${index + 2}`)
             .join(", ");
-        const query = `UPDATE public.users SET ${setClause}, updated_at = $${fieldsToUpdate.length + 2} WHERE id = $1 RETURNING id, first_name, last_name, email, phone_number, role, created_at, updated_at`;
+        const query = `UPDATE public.users SET ${setClause} WHERE id = $1 RETURNING id, first_name, last_name, email, phone_number, role, created_at, updated_at`;
+
         const user = await this.db.query(query, [
             id,
             ...valuesToUpdate
