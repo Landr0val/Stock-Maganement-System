@@ -1,4 +1,8 @@
-import type { CreateProductInput, UpdateProductInput, ProductResponse } from "../types/product.type";
+import type {
+    CreateProductInput,
+    UpdateProductInput,
+    ProductResponse,
+} from "../types/product.type";
 import { DatabaseService } from "../services/database.service";
 import { ulid } from "ulid";
 
@@ -21,7 +25,7 @@ export class ProductRepository {
     async findAll(options: {
         page: number;
         limit: number;
-        filters?: { category?: string; tag?: string }
+        filters?: { category?: string; tag?: string };
     }): Promise<{
         products: ProductResponse[];
         total: number;
@@ -42,13 +46,16 @@ export class ProductRepository {
             params.push(options.filters.tag);
         }
 
-        const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
+        const whereClause =
+            whereClauses.length > 0
+                ? `WHERE ${whereClauses.join(" AND ")}`
+                : "";
         const query = `SELECT id, name, description, price, created_at, updated_at FROM public.products ${whereClause} ORDER BY created_at DESC LIMIT $${paramIndex + params.length} OFFSET $${paramIndex + params.length + 1}`;
         params.push(options.limit, offset);
         const result = await this.db.query(query, params);
         const products = result.map((row: any) => {
-            const { total_count, ...products} = row;
-        })
+            const { total_count, ...products } = row;
+        });
         const total = result.length > 0 ? parseInt(result[0].total_count) : 0;
         const totalPages = Math.ceil(total / options.limit);
         return {
@@ -61,22 +68,27 @@ export class ProductRepository {
     async findById(id: string): Promise<ProductResponse | null> {
         const product = await this.db.query(
             "SELECT id, name, description, stock, price, category_id, tags_id, created_at, updated_at FROM public.products WHERE id = $1",
-            [id]
-        )
+            [id],
+        );
         if (!product && product.length === 0) {
             return null;
         }
         return product[0];
     }
 
-    async update(id: string, data: UpdateProductInput): Promise<ProductResponse | null> {
+    async update(
+        id: string,
+        data: UpdateProductInput,
+    ): Promise<ProductResponse | null> {
         const filtered = Object.entries(data).filter(
             ([_, value]) => value != null,
         );
         if (filtered.length === 0) {
             return null;
         }
-        const fieldsToUpdate = filtered.map(([key, _], index) => `${key} = $${index + 1}`);
+        const fieldsToUpdate = filtered.map(
+            ([key, _], index) => `${key} = $${index + 1}`,
+        );
         const valuesToUpdate = filtered.map(([_, value]) => value);
         valuesToUpdate.push(id);
 
@@ -91,7 +103,7 @@ export class ProductRepository {
     async delete(id: string): Promise<boolean> {
         const result = await this.db.query(
             "DELETE FROM public.products WHERE id = $1 RETURNING id",
-            [id]
+            [id],
         );
         return result.rows.length > 0;
     }

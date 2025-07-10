@@ -3,12 +3,15 @@ import { DatabaseService } from "../services/database.service";
 import { CategoryRepository } from "../repositories/category.repository";
 import { TagRepository } from "../repositories/tag.repository";
 import { ProductRepository } from "../repositories/product.repository";
+import { UserRepository } from "../repositories/user.repository";
 import { CategoryService } from "../services/category.service";
 import { TagService } from "../services/tag.service";
 import { ProductService } from "../services/product.service";
+import { UserService } from "../services/user.service";
 import { CategoryController } from "../controllers/category.controller";
 import { TagController } from "../controllers/tag.controller";
 import { ProductController } from "../controllers/product.controller";
+import { UserController } from "../controllers/user.controller";
 
 export class Container {
 
@@ -16,12 +19,15 @@ export class Container {
     public categoryRepository: CategoryRepository;
     public tagRepository: TagRepository;
     public productRepository: ProductRepository;
+    public userRepository: UserRepository;
     public categoryService: CategoryService;
     public tagService: TagService;
     public productService: ProductService;
+    public userService: UserService;
     public categoryController: CategoryController;
     public tagController: TagController;
     public productController: ProductController;
+    public userController: UserController;
 
     constructor() {
         const pool = DatabasePool.getInstance();
@@ -29,12 +35,15 @@ export class Container {
         this.categoryRepository = new CategoryRepository(db);
         this.tagRepository = new TagRepository(db);
         this.productRepository = new ProductRepository(db);
+        this.userRepository = new UserRepository(db);
         this.categoryService = new CategoryService(this.categoryRepository);
         this.tagService = new TagService(this.tagRepository);
         this.productService = new ProductService(this.productRepository);
+        this.userService = new UserService(this.userRepository);
         this.categoryController = new CategoryController(this.categoryService);
         this.tagController = new TagController(this.tagService);
         this.productController = new ProductController(this.productService);
+        this.userController = new UserController(this.userService);
     }
 
     public static getInstance(): Container {
@@ -78,6 +87,10 @@ export class Container {
 
     public static getProductController(): ProductController {
         return Container.getInstance().productController;
+    }
+
+    public static getUserController(): UserController {
+        return Container.getInstance().userController;
     }
 
     public static closePool(): void {

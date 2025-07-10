@@ -8,8 +8,8 @@ import { ProductService } from "../services/product.service";
 export class ProductController {
     constructor(private readonly service: ProductService) {}
 
-    async createProduct(input: CreateProductInput): Promise<ProductResponse> {
-        return this.service.createProduct(input);
+    async createProduct(data: CreateProductInput): Promise<ProductResponse> {
+        return this.service.createProduct(data);
     }
 
     async findAllProducts(options: {
@@ -30,9 +30,9 @@ export class ProductController {
 
     async updateProduct(
         id: string,
-        input: UpdateProductInput,
+        data: UpdateProductInput,
     ): Promise<ProductResponse | null> {
-        return await this.service.updateProduct(id, input);
+        return await this.service.updateProduct(id, data);
     }
 
     async deleteProduct(id: string): Promise<boolean> {
