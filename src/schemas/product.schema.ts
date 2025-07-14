@@ -7,7 +7,7 @@ export const CreateProductSchema = z.object({
    price: z.coerce.bigint(),
    category_id: z.string().ulid("Invalid category ID format"),
    image: z.string().url("Invalid image URL format").optional(),
-   tags: z.array(z.string().ulid()).optional()
+   tags_id: z.array(z.string().ulid()).optional()
 });
 
 export const UpdateProductSchema = z.object({
@@ -17,7 +17,7 @@ export const UpdateProductSchema = z.object({
     price: z.coerce.bigint().optional(),
     category_id: z.string().ulid("Invalid category ID format").optional(),
     image: z.string().url("Invalid image URL format").optional(),
-    tags: z.array(z.string().ulid()).optional()
+    tags_id: z.array(z.string().ulid()).optional()
 });
 
 export const ProductResponseSchema = z.object({
@@ -28,7 +28,7 @@ export const ProductResponseSchema = z.object({
     price: z.coerce.bigint(),
     category_id: z.string().ulid("Invalid category ID format"),
     image: z.string().url("Invalid image URL format").optional(),
-    tags: z.array(z.string().ulid()).optional(),
+    tags_id: z.array(z.string().ulid()).optional(),
     createdAt: z.date(),
     updatedAt: z.date()
 });

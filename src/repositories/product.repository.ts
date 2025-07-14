@@ -39,12 +39,12 @@ export class ProductRepository {
             let paramIndex = 1;
 
             if (options.filters?.category) {
-                whereClauses.push(`category_id = $${paramIndex}`);
+                whereClauses.push(`p.category_id = $${paramIndex}`);
                 params.push(options.filters.category);
                 paramIndex++;
             }
             if (options.filters?.tag) {
-                whereClauses.push(`tags_id @> ARRAY[$${paramIndex}]`);
+                whereClauses.push(`p.tags_id @> ARRAY[$${paramIndex}]::text[]`);
                 params.push(options.filters.tag);
                 paramIndex++;
             }
@@ -54,15 +54,39 @@ export class ProductRepository {
                     ? `WHERE ${whereClauses.join(" AND ")}`
                     : "";
 
-            const countQuery = `SELECT COUNT(*) as total FROM public.products ${whereClause}`;
-            const countParams = params.slice();
-            const countResult = await this.db.query(countQuery, countParams);
-            const total = parseInt(countResult[0].total);
+            const query = `
+                   WITH filtered_products AS (
+                       SELECT
+                           p.id,
+                           p.name,
+                           p.description,
+                           p.stock,
+                           p.price,
+                           p.category_id,
+                           ARRAY(
+                               SELECT t.name
+                               FROM tags t
+                               WHERE t.id = ANY(p.tags_id)
+                           ) AS tags_id,
+                           p.created_at,
+                           p.updated_at,
+                           COUNT(*) OVER() AS total_count
+                       FROM products p
+                       ${whereClause}
+                       ORDER BY p.created_at DESC
+                       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+                   )
+                   SELECT * FROM filtered_products
+               `;
 
-            const query = `SELECT id, name, description, stock, price, category_id, tags_id, created_at, updated_at FROM public.products ${whereClause} ORDER BY created_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
             const queryParams = [...params, options.limit, offset];
             const result = await this.db.query(query, queryParams);
 
+            if (result.length === 0) {
+                return { products: [], total: 0, totalPages: 0 };
+            }
+
+            const total = parseInt(result[0].total_count);
             const products = result.map((row: any) => ({
                 id: row.id,
                 name: row.name,
@@ -77,11 +101,7 @@ export class ProductRepository {
 
             const totalPages = Math.ceil(total / options.limit);
 
-            return {
-                products,
-                total,
-                totalPages,
-            };
+            return { products, total, totalPages };
         } catch (error) {
             console.error("Error in findAll:", error);
             throw error;
