@@ -39,16 +39,15 @@ export class ProductRepository {
             let paramIndex = 1;
 
             if (options.filters?.category) {
-                whereClauses.push(`p.category_id = $${paramIndex}`);
+                whereClauses.push(`category_id = $${paramIndex}`);
                 params.push(options.filters.category);
                 paramIndex++;
             }
             if (options.filters?.tag) {
-                whereClauses.push(`p.tags_id @> ARRAY[$${paramIndex}]::text[]`);
+                whereClauses.push(`tags_id @> ARRAY[$${paramIndex}]`);
                 params.push(options.filters.tag);
                 paramIndex++;
             }
-
             const whereClause =
                 whereClauses.length > 0
                     ? `WHERE ${whereClauses.join(" AND ")}`
@@ -62,16 +61,17 @@ export class ProductRepository {
                            p.description,
                            p.stock,
                            p.price,
-                           p.category_id,
+                           c.name AS category_id,
                            ARRAY(
                                SELECT t.name
                                FROM tags t
                                WHERE t.id = ANY(p.tags_id)
-                           ) AS tags_id,
+                           ) AS tags,
                            p.created_at,
                            p.updated_at,
                            COUNT(*) OVER() AS total_count
                        FROM products p
+                       LEFT JOIN categories c ON p.category_id = c.id
                        ${whereClause}
                        ORDER BY p.created_at DESC
                        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
@@ -92,16 +92,18 @@ export class ProductRepository {
                 name: row.name,
                 description: row.description,
                 stock: Number(row.stock),
-                price: BigInt(row.price),
+                price: Number(row.price),
                 category_id: row.category_id,
-                tags: row.tags_id,
+                tags: row.tags,
                 createdAt: new Date(row.created_at),
                 updatedAt: new Date(row.updated_at),
             }));
 
-            const totalPages = Math.ceil(total / options.limit);
-
-            return { products, total, totalPages };
+            return {
+                products,
+                total,
+                totalPages: Math.ceil(total / options.limit),
+            };
         } catch (error) {
             console.error("Error in findAll:", error);
             throw error;
@@ -110,7 +112,15 @@ export class ProductRepository {
 
     async findById(id: string): Promise<ProductResponse | null> {
         const product = await this.db.query(
-            "SELECT id, name, description, stock, price, category_id, tags_id, created_at, updated_at FROM public.products WHERE id = $1",
+            `SELECT p.id, p.name, p.description, p.stock, p.price, p.category_id,
+                    c.name as category_id,
+                    ARRAY_AGG(t.name) as tags, p.created_at, p.updated_at
+             FROM public.products p
+             LEFT JOIN public.categories c ON p.category_id = c.id
+             LEFT JOIN UNNEST(p.tags_id) AS tag_id ON true
+             LEFT JOIN public.tags t ON t.id = tag_id
+             WHERE p.id = $1
+             GROUP BY p.id, p.name, p.description, p.stock, p.price, p.category_id, c.name, p.created_at, p.updated_at`,
             [id],
         );
 
