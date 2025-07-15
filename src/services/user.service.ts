@@ -1,5 +1,6 @@
 import type { CreateUserInput, UpdateUserInput, UserResponse } from "../types/user.type";
 import { UserRepository } from "../repositories/user.repository";
+import {EncryptionService } from "./encryption.service";
 
 export class UserService {
     constructor(private readonly repository: UserRepository) {}
@@ -9,7 +10,9 @@ export class UserService {
         if (existingUser) {
             throw new Error(`User with email ${data.email} already exists`);
         }
-        const user = await this.repository.create(data);
+
+        const hashedPassword = await EncryptionService.hashPassword(data.password);
+        const user = await this.repository.create({...data, password: hashedPassword});
         return user;
     }
 
@@ -38,6 +41,10 @@ export class UserService {
     }
 
     async updateUser(id: string, data: UpdateUserInput): Promise<UserResponse> {
+        if (data.password) {
+            const hashedPassword = await EncryptionService.hashPassword(data.password);
+            data = { ...data, password: hashedPassword }
+        }
         const user = await this.repository.update(id, data);
         if (!user || Object.keys(user).length === 0) {
             throw new Error(`User not found`);
