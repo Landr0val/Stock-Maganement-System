@@ -153,13 +153,12 @@ To authenticate and receive a token, send a `POST` request to the `/auth/login` 
     ```json
     {
       "message": "Login successful",
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
       "user": {
         "id": "01H8X...",
-        "name": "Test User",
         "email": "user@example.com",
-        "role": "ADMIN"
-      }
+        "role": "admin"
+      },
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
     }
     ```
 
