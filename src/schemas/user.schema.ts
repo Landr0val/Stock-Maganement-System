@@ -27,3 +27,10 @@ export const UserResponseSchema = z.object({
     createdAt: z.date(),
     updatedAt: z.date(),
 }).strict();
+
+export const UserWithEmailAndPassword = z.object({
+    id: z.string().ulid("Invalid user ID format"),
+    email: z.string().email("Invalid email format"),
+    password: z.string(),
+    role: z.nativeEnum(UserRole)
+});

@@ -132,6 +132,50 @@ bun run index.ts
 - `PUT /api/v1/tags/:id` - Update tag
 - `DELETE /api/v1/tags/:id` - Delete tag
 
+## Authentication
+
+The authentication system uses JSON Web Tokens (JWT) to secure endpoints.
+
+### Login
+
+To authenticate and receive a token, send a `POST` request to the `/auth/login` endpoint.
+
+-   **Endpoint:** `POST /auth/login`
+-   **Body:**
+    ```json
+    {
+      "email": "user@example.com",
+      "password": "your_password"
+    }
+    ```
+-   **Success Response:**
+    On successful authentication, the API returns a JWT and user information.
+    ```json
+    {
+      "message": "Login successful",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      "user": {
+        "id": "01H8X...",
+        "name": "Test User",
+        "email": "user@example.com",
+        "role": "ADMIN"
+      }
+    }
+    ```
+
+### Accessing Protected Routes
+
+To access protected routes, include the JWT in the `Authorization` header with the `Bearer` scheme.
+
+-   **Header:** `Authorization: Bearer <your_jwt_token>`
+
+If the token is missing or invalid, the API will respond with a `401 Unauthorized` status.
+
+### User Management
+
+-   **User Creation:** `POST /users` - This endpoint is protected and can only be accessed by authenticated users. It is used for creating new users within the system, not for public registration.
+-   **Get Current User:** `GET /auth/me` - Returns the profile of the currently authenticated user.
+
 ## 🏗️ Architecture
 
 The project follows a layered architecture:

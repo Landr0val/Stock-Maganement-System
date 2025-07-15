@@ -1,7 +1,8 @@
 import type { FastifyRequest, FastifyReply, FastifyInstance } from "fastify";
 import { CreateTagSchema, UpdateTagSchema, TagResponseSchema } from "../schemas/tag.schema";
 import { Container } from "../config/container";
-import { ZodError } from "zod";
+import { UserRole } from '../utils/roles';
+import { authenticateToken, authorizeRoles } from '../middlewares/auth.middleware';
 
 export async function tagRouter(fastify: FastifyInstance) {
     const tagController = Container.getTagController();
@@ -10,6 +11,9 @@ export async function tagRouter(fastify: FastifyInstance) {
         async (fastify) => {
             fastify.post(
                 "/",
+                {
+                    preHandler: [authenticateToken, authorizeRoles(UserRole.ADMIN)]
+                },
                 async (request: FastifyRequest, reply: FastifyReply) => {
                     const data = CreateTagSchema.parse(request.body);
                     await tagController.createTag(data, request, reply);
@@ -18,6 +22,9 @@ export async function tagRouter(fastify: FastifyInstance) {
 
             fastify.get(
                 "/",
+                {
+                    preHandler: [authenticateToken, authorizeRoles(UserRole.ADMIN, UserRole.MANAGER, UserRole.OPERATOR)]
+                },
                 async (request: FastifyRequest, reply: FastifyReply) => {
                     await tagController.findAllTags(request, reply)
                 }
@@ -25,6 +32,9 @@ export async function tagRouter(fastify: FastifyInstance) {
 
             fastify.get(
                 "/:id",
+                {
+                    preHandler: [authenticateToken, authorizeRoles(UserRole.ADMIN, UserRole.MANAGER, UserRole.OPERATOR)]
+                },
                 async (request: FastifyRequest, reply: FastifyReply) => {
                     const { id } = request.params as { id: string };
                     await tagController.findTagById(id, request, reply);
@@ -33,6 +43,9 @@ export async function tagRouter(fastify: FastifyInstance) {
 
             fastify.patch(
                 "/:id",
+                {
+                    preHandler: [authenticateToken, authorizeRoles(UserRole.ADMIN)]
+                },
                 async (request: FastifyRequest, reply: FastifyReply) => {
                     const { id } = request.params as { id: string };
                     const data = UpdateTagSchema.parse(request.body);
@@ -42,6 +55,9 @@ export async function tagRouter(fastify: FastifyInstance) {
 
             fastify.delete(
                 "/:id",
+                {
+                    preHandler: [authenticateToken, authorizeRoles(UserRole.ADMIN)]
+                },
                 async (request: FastifyRequest, reply: FastifyReply) => {
                     const { id } = request.params as { id: string };
                     await tagController.deleteTag(id, request, reply);

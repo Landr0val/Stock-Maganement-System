@@ -1,7 +1,8 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { CreateProductSchema, UpdateProductSchema } from '../schemas/product.schema';
 import { Container } from '../config/container';
-import { ZodError } from 'zod';
+import { UserRole } from '../utils/roles';
+import { authenticateToken, authorizeRoles } from '../middlewares/auth.middleware';
 
 export async function productRouter(fastify: FastifyInstance) {
     const productController = Container.getProductController();
@@ -10,6 +11,12 @@ export async function productRouter(fastify: FastifyInstance) {
         async (fastify: FastifyInstance) => {
             fastify.post(
                 "/",
+                {
+                    preHandler: [
+                        authenticateToken,
+                        authorizeRoles(UserRole.ADMIN, UserRole.MANAGER, UserRole.OPERATOR)
+                    ]
+                },
                 async (request: FastifyRequest, reply: FastifyReply) => {
                     const data = CreateProductSchema.parse(request.body);
                     await productController.createProduct(data, request, reply);
@@ -18,6 +25,12 @@ export async function productRouter(fastify: FastifyInstance) {
 
             fastify.get(
                 "/",
+                {
+                    preHandler: [
+                        authenticateToken,
+                        authorizeRoles(UserRole.ADMIN, UserRole.MANAGER, UserRole.OPERATOR)
+                    ]
+                },
                 async (request: FastifyRequest, reply: FastifyReply) => {
                         const { page = 1, limit = 10, category, tag } = request.query as {
                             page?: number;
@@ -39,6 +52,12 @@ export async function productRouter(fastify: FastifyInstance) {
 
             fastify.get(
                 "/:id",
+                {
+                    preHandler: [
+                        authenticateToken,
+                        authorizeRoles(UserRole.ADMIN, UserRole.MANAGER, UserRole.OPERATOR)
+                    ]
+                },
                 async (request: FastifyRequest, reply: FastifyReply) => {
                     const { id } = request.params as { id: string };
                     await productController.findProductById(id, request, reply);
@@ -47,6 +66,12 @@ export async function productRouter(fastify: FastifyInstance) {
 
             fastify.patch(
                 "/:id",
+                {
+                    preHandler: [
+                        authenticateToken,
+                        authorizeRoles(UserRole.ADMIN, UserRole.MANAGER)
+                    ]
+                },
                 async (request: FastifyRequest, reply: FastifyReply) => {
                     const { id } = request.params as { id: string };
                     const data = UpdateProductSchema.parse(request.body);
@@ -56,6 +81,12 @@ export async function productRouter(fastify: FastifyInstance) {
 
             fastify.delete(
                 "/:id",
+                {
+                    preHandler: [
+                        authenticateToken,
+                        authorizeRoles(UserRole.ADMIN, UserRole.MANAGER)
+                    ]
+                },
                 async (request: FastifyRequest, reply: FastifyReply) => {
                     const { id } = request.params as { id: string };
                     await productController.deleteProduct(id, request, reply);

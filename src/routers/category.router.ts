@@ -2,6 +2,8 @@ import type { FastifyRequest, FastifyReply, FastifyInstance } from "fastify";
 import { CreateCategorySchema, UpdateCategorySchema, CategoryResponseSchema } from "../schemas/category.schema";
 import { Container } from "../config/container";
 import { ZodError } from "zod";
+import { UserRole } from "../utils/roles";
+import { authenticateToken, authorizeRoles } from "../middlewares/auth.middleware";
 
 export async function categoryRouter(fastify: FastifyInstance) {
     const categoryController = Container.getCategoryController();
@@ -10,6 +12,12 @@ export async function categoryRouter(fastify: FastifyInstance) {
         async (fastify) => {
             fastify.post(
                 "/",
+                {
+                    preHandler: [
+                        authenticateToken,
+                        authorizeRoles(UserRole.ADMIN, UserRole.MANAGER)
+                    ]
+                },
                 async (request: FastifyRequest, reply: FastifyReply) => {
                     const data = CreateCategorySchema.parse(request.body);
                     await categoryController.createCategory(data, request, reply);
@@ -19,6 +27,12 @@ export async function categoryRouter(fastify: FastifyInstance) {
 
             fastify.get(
                 "/",
+                {
+                    preHandler: [
+                        authenticateToken,
+                        authorizeRoles(UserRole.ADMIN, UserRole.MANAGER, UserRole.OPERATOR)
+                    ],
+                },
                 async (request: FastifyRequest, reply: FastifyReply) => {
                     await categoryController.findAllCategories(request, reply);
                 }
@@ -26,6 +40,12 @@ export async function categoryRouter(fastify: FastifyInstance) {
 
             fastify.get(
                 "/:id",
+                {
+                    preHandler: [
+                        authenticateToken,
+                        authorizeRoles(UserRole.ADMIN, UserRole.MANAGER, UserRole.OPERATOR)
+                    ]
+                },
                 async (request: FastifyRequest, reply: FastifyReply) => {
                     const { id } = request.params as { id: string };
                     await categoryController.findCategoryById(id, request, reply);
@@ -34,6 +54,12 @@ export async function categoryRouter(fastify: FastifyInstance) {
 
             fastify.patch(
                 "/:id",
+                {
+                    preHandler: [
+                        authenticateToken,
+                        authorizeRoles(UserRole.ADMIN, UserRole.MANAGER)
+                    ]
+                },
                 async (request: FastifyRequest, reply: FastifyReply) => {
                     const { id } = request.params as { id: string };
 
@@ -44,6 +70,12 @@ export async function categoryRouter(fastify: FastifyInstance) {
 
             fastify.delete(
                 "/:id",
+                {
+                    preHandler: [
+                        authenticateToken,
+                        authorizeRoles(UserRole.ADMIN, UserRole.MANAGER)
+                    ]
+                },
                 async (request: FastifyRequest, reply: FastifyReply) => {
                     const { id } = request.params as { id: string };
                     await categoryController.deleteCategory(id, request, reply);

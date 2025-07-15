@@ -41,4 +41,19 @@ export class EncryptionService {
             return true; // <- If there's an error, we assume rehashing is needed
         }
     }
+
+    static async verifyAndRehash(hashedPassword: string, password: string): Promise<{ isValid: boolean; needsRehash: boolean; newHash?: string }> {
+        const isValid = await this.verifyPassword(hashedPassword, password);
+        if (!isValid) {
+            return { isValid: false, needsRehash: false };
+        }
+
+        const needsRehash = await this.needsRehash(hashedPassword);
+        if (needsRehash) {
+            const newHash = await this.hashPassword(password);
+            return { isValid: true, needsRehash: true, newHash };
+        }
+
+        return { isValid: true, needsRehash: false };
+    }
 }

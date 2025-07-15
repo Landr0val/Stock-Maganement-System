@@ -2,6 +2,7 @@ import type {
     CreateUserInput,
     UpdateUserInput,
     UserResponse,
+    UserWithEmailAndPassword
 } from "../types/user.type";
 import { DatabaseService } from "../services/database.service";
 import { ulid } from "ulid";
@@ -82,6 +83,17 @@ export class UserRepository {
         return user;
     }
 
+    async findByIdWithPassword(id: string): Promise<UserWithEmailAndPassword | null> {
+        const user = await this.db.query(
+            "SELECT id, email, password, role FROM public.users WHERE id = $1",
+            [id],
+        );
+        if (user.length === 0) {
+            return null;
+        }
+        return user[0];
+    }
+
     async findByEmail(email: string): Promise<UserResponse | null> {
         const user = await this.db.query(
             "SELECT id, first_name, last_name, email, phone_number, role, created_at, updated_at FROM public.users WHERE email = $1",
@@ -93,12 +105,15 @@ export class UserRepository {
         return user;
     }
 
-    async findByEmailWithPassword(email: string): Promise<UserResponse | null> {
+    async findByEmailWithPassword(email: string): Promise< UserWithEmailAndPassword | null> {
         const user = await this.db.query(
-            "SELECT email, password FROM public.users WHERE email = $1",
+            "SELECT id, email, password, role FROM public.users WHERE email = $1",
             [email],
         );
-        return user;
+        if (user.length === 0) {
+            return null;
+        }
+        return user[0];
     }
 
     async update(
@@ -129,12 +144,12 @@ export class UserRepository {
     }
 
     async updatePassword(
-        email: string,
+        id: string,
         hashedPassword: string,
     ): Promise<boolean> {
         const result = await this.db.query(
-            "UPDATE public.users SET password = $1, updated_at = CURRENT_TIMESTAMP WHERE email = $2",
-            [hashedPassword, email],
+            "UPDATE public.users SET password = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2",
+            [hashedPassword, id],
         );
         return result > 0;
     }
