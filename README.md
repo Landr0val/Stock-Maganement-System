@@ -1,156 +1,156 @@
-# 📦 SMS - Sistema de Gestión de Productos
+# 📦 SMS - Product Management System
 
-> **Proyecto Personal** - API REST para gestión de productos, categorías y etiquetas
+> **Personal Project** - REST API for managing products, categories, and tags
 
-## 📋 Descripción
+## 📋 Description
 
-SMS es una API REST construida con **Fastify**, **Bun** y **TypeScript** que permite gestionar un catálogo de productos con sistema de categorías jerárquicas y etiquetas. El proyecto implementa una arquitectura en capas con patrón Repository y servicios para una separación clara de responsabilidades.
+SMS is a REST API built with **Fastify**, **Bun**, and **TypeScript** that allows managing a product catalog with a system of hierarchical categories and tags. The project implements a layered architecture with the Repository pattern and services for a clear separation of responsibilities.
 
-## 🚀 Características
+## 🚀 Features
 
-- ✅ **API REST** con endpoints para productos, categorías y etiquetas
-- ✅ **Categorías jerárquicas** con soporte para subcategorías
-- ✅ **Sistema de etiquetas** para clasificación flexible
-- ✅ **Validación de datos** con Zod schemas
-- ✅ **Arquitectura en capas** (Controller → Service → Repository)
-- ✅ **Inyección de dependencias** con Container pattern
-- ✅ **Base de datos PostgreSQL** con pool de conexiones
-- ✅ **Logging estructurado** con Pino
-- ✅ **TypeScript** para type safety
-- ✅ **Hot reload** en desarrollo
+- ✅ **REST API** with endpoints for products, categories, and tags
+- ✅ **Hierarchical categories** with support for subcategories
+- ✅ **Tag system** for flexible classification
+- ✅ **Data validation** with Zod schemas
+- ✅ **Layered architecture** (Controller → Service → Repository)
+- ✅ **Dependency injection** with Container pattern
+- ✅ **PostgreSQL database** with connection pool
+- ✅ **Structured logging** with Pino
+- ✅ **TypeScript** for type safety
+- ✅ **Hot reload** in development
 
-## 🛠️ Tecnologías
+## 🛠️ Technologies
 
-- **Runtime**: [Bun](https://bun.sh) - JavaScript runtime rápido
-- **Framework**: [Fastify](https://fastify.dev) - Framework web de alto rendimiento
-- **Lenguaje**: [TypeScript](https://www.typescriptlang.org) - JavaScript con tipos
-- **Base de datos**: [PostgreSQL](https://www.postgresql.org) - Base de datos relacional
-- **Validación**: [Zod](https://zod.dev) - Schema validation
-- **Logging**: [Pino](https://getpino.io) - Logger de alto rendimiento
-- **IDs**: [ULID](https://github.com/ulid/spec) - Identificadores únicos
+- **Runtime**: [Bun](https://bun.sh) - Fast JavaScript runtime
+- **Framework**: [Fastify](https://fastify.dev) - High-performance web framework
+- **Language**: [TypeScript](https://www.typescriptlang.org) - JavaScript with types
+- **Database**: [PostgreSQL](https://www.postgresql.org) - Relational database
+- **Validation**: [Zod](httpss://zod.dev) - Schema validation
+- **Logging**: [Pino](https://getpino.io) - High-performance logger
+- **IDs**: [ULID](https://github.com/ulid/spec) - Unique identifiers
 
-## 📁 Estructura del Proyecto
+## 📁 Project Structure
 
 ```
 SMS/
 ├── src/
-│   ├── config/          # Configuración de la aplicación
-│   ├── controllers/     # Controladores de las rutas
-│   ├── repositories/    # Acceso a datos
-│   ├── routers/         # Definición de rutas
-│   ├── schemas/         # Esquemas de validación Zod
-│   ├── services/        # Lógica de negocio
-│   ├── types/           # Definiciones de tipos
-│   └── server.ts        # Servidor principal
+│   ├── config/          # Application configuration
+│   ├── controllers/     # Route controllers
+│   ├── repositories/    # Data access
+│   ├── routers/         # Route definitions
+│   ├── schemas/         # Zod validation schemas
+│   ├── services/        # Business logic
+│   ├── types/           # Type definitions
+│   └── server.ts        # Main server
 ├── package.json
 ├── tsconfig.json
 └── README.md
 ```
 
-## 🔧 Instalación
+## 🔧 Installation
 
-### Prerrequisitos
+### Prerequisites
 
-- [Bun](https://bun.sh) v1.2.16 o superior
-- [PostgreSQL](https://www.postgresql.org) 12 o superior
-- [Node.js](https://nodejs.org) 18 o superior (opcional, para compatibilidad)
+- [Bun](https://bun.sh) v1.2.16 or higher
+- [PostgreSQL](https://www.postgresql.org) 12 or higher
+- [Node.js](https://nodejs.org) 18 or higher (optional, for compatibility)
 
-### Pasos
+### Steps
 
-1. **Clonar el repositorio**
+1. **Clone the repository**
 ```bash
-git clone <url-del-repositorio>
+git clone <repository-url>
 cd SMS
 ```
 
-2. **Instalar dependencias**
+2. **Install dependencies**
 ```bash
 bun install
 ```
 
-3. **Configurar base de datos**
+3. **Configure database**
 ```bash
-# Crear base de datos PostgreSQL
-# Ejecutar migraciones (si aplica)
+# Create PostgreSQL database
+# Run migrations (if applicable)
 ```
 
-4. **Configurar variables de entorno**
+4. **Configure environment variables**
 ```bash
-# Crear archivo .env con la configuración de tu base de datos
-# DATABASE_URL=postgresql://usuario:contraseña@localhost:5432/sms_db
+# Create .env file with your database configuration
+# DATABASE_URL=postgresql://user:password@localhost:5432/sms_db
 ```
 
-## 🚀 Uso
+## 🚀 Usage
 
-### Desarrollo
+### Development
 
 ```bash
-# Iniciar servidor en modo desarrollo (hot reload)
+# Start server in development mode (hot reload)
 bun run dev
 ```
 
-### Producción
+### Production
 
 ```bash
-# Construir la aplicación
+# Build the application
 bun run build
 
-# Iniciar servidor en producción
+# Start server in production
 bun run start
 ```
 
-### Servidor directo
+### Direct server
 
 ```bash
-# Ejecutar el archivo principal
+# Execute the main file
 bun run index.ts
 ```
 
 ## 📡 API Endpoints
 
-### Productos
+### Products
 
-- `GET /api/v1/products` - Obtener todos los productos
-- `GET /api/v1/products/:id` - Obtener producto por ID
-- `POST /api/v1/products` - Crear nuevo producto
-- `PUT /api/v1/products/:id` - Actualizar producto
-- `DELETE /api/v1/products/:id` - Eliminar producto
+- `GET /api/v1/products` - Get all products
+- `GET /api/v1/products/:id` - Get product by ID
+- `POST /api/v1/products` - Create new product
+- `PUT /api/v1/products/:id` - Update product
+- `DELETE /api/v1/products/:id` - Delete product
 
-### Categorías
+### Categories
 
-- `GET /api/v1/categories` - Obtener todas las categorías
-- `GET /api/v1/categories/:id` - Obtener categoría por ID
-- `POST /api/v1/categories` - Crear nueva categoría
-- `PUT /api/v1/categories/:id` - Actualizar categoría
-- `DELETE /api/v1/categories/:id` - Eliminar categoría
+- `GET /api/v1/categories` - Get all categories
+- `GET /api/v1/categories/:id` - Get category by ID
+- `POST /api/v1/categories` - Create new category
+- `PUT /api/v1/categories/:id` - Update category
+- `DELETE /api/v1/categories/:id` - Delete category
 
-### Etiquetas
+### Tags
 
-- `GET /api/v1/tags` - Obtener todas las etiquetas
-- `GET /api/v1/tags/:id` - Obtener etiqueta por ID
-- `POST /api/v1/tags` - Crear nueva etiqueta
-- `PUT /api/v1/tags/:id` - Actualizar etiqueta
-- `DELETE /api/v1/tags/:id` - Eliminar etiqueta
+- `GET /api/v1/tags` - Get all tags
+- `GET /api/v1/tags/:id` - Get tag by ID
+- `POST /api/v1/tags` - Create new tag
+- `PUT /api/v1/tags/:id` - Update tag
+- `DELETE /api/v1/tags/:id` - Delete tag
 
-## 🏗️ Arquitectura
+## 🏗️ Architecture
 
-El proyecto sigue una arquitectura en capas:
+The project follows a layered architecture:
 
-- **Controllers**: Manejan las peticiones HTTP y respuestas
-- **Services**: Contienen la lógica de negocio
-- **Repositories**: Acceso a datos y consultas a la base de datos
-- **Schemas**: Validación y transformación de datos con Zod
-- **Container**: Inyección de dependencias tipo Singleton
+- **Controllers**: Handle HTTP requests and responses
+- **Services**: Contain business logic
+- **Repositories**: Data access and database queries
+- **Schemas**: Data validation and transformation with Zod
+- **Container**: Singleton-like dependency injection
 
-## 🔍 Características Técnicas
+## 🔍 Technical Features
 
-- **Validación automática** de payloads con Zod
-- **Manejo de BigInt** para precios y valores monetarios
-- **IDs únicos** usando ULID para mejor rendimiento
-- **Logging estructurado** con Pino Pretty para desarrollo
-- **Pool de conexiones** a PostgreSQL para escalabilidad
-- **Hot reload** automático en desarrollo
+- **Automatic payload validation** with Zod
+- **BigInt handling** for prices and monetary values
+- **Unique IDs** using ULID for better performance
+- **Structured logging** with Pino Pretty for development
+- **Connection pool** to PostgreSQL for scalability
+- **Automatic hot reload** in development
 
 ---
 
-**Nota**: Este proyecto fue creado como parte de mi aprendizaje en desarrollo de APIs REST con tecnologías modernas de JavaScript/TypeScript.
+**Note**: This project was created as part of my learning in REST API development with modern JavaScript/TypeScript technologies.
