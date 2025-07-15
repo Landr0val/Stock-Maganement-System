@@ -8,6 +8,7 @@ import { CategoryService } from "../services/category.service";
 import { TagService } from "../services/tag.service";
 import { ProductService } from "../services/product.service";
 import { UserService } from "../services/user.service";
+import { AuthService } from "../services/auth.service";
 import { CategoryController } from "../controllers/category.controller";
 import { TagController } from "../controllers/tag.controller";
 import { ProductController } from "../controllers/product.controller";
@@ -24,6 +25,7 @@ export class Container {
     public tagService: TagService;
     public productService: ProductService;
     public userService: UserService;
+    public authService: AuthService;
     public categoryController: CategoryController;
     public tagController: TagController;
     public productController: ProductController;
@@ -40,6 +42,7 @@ export class Container {
         this.tagService = new TagService(this.tagRepository);
         this.productService = new ProductService(this.productRepository);
         this.userService = new UserService(this.userRepository);
+        this.authService = new AuthService(this.userRepository);
         this.categoryController = new CategoryController(this.categoryService);
         this.tagController = new TagController(this.tagService);
         this.productController = new ProductController(this.productService);
@@ -75,6 +78,10 @@ export class Container {
 
     public static getProductService(): ProductService {
         return Container.getInstance().productService;
+    }
+
+    public static getAuthService(): AuthService {
+        return Container.getInstance().authService;
     }
 
     public static getCategoryController(): CategoryController {

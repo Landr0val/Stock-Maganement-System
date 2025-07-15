@@ -3,6 +3,7 @@ import { categoryRouter } from './routers/category.router';
 import { productRouter } from './routers/product.router';
 import { tagRouter } from './routers/tag.router';
 import { userRouter } from './routers/user.router';
+import { authRouter } from './routers/auth.router';
 import { Container } from './config/container';
 
 const originalStringify = JSON.stringify;
@@ -40,6 +41,7 @@ server.register(
         await fastify.register(productRouter);
         await fastify.register(tagRouter);
         await fastify.register(userRouter);
+        await fastify.register(authRouter);
     }, { prefix: '/api/v1' }
 )
 

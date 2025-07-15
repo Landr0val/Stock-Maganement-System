@@ -3,6 +3,7 @@ import type { CreateUserInput, UpdateUserInput, UserResponse } from "../types/us
 import { CreateUserSchema, UpdateUserSchema } from "../schemas/user.schema";
 import { UserService } from "../services/user.service";
 import { ZodError } from "zod";
+import { UserRole } from "../utils/roles";
 
 export class UserController {
     constructor(private readonly service: UserService) {}
@@ -10,7 +11,16 @@ export class UserController {
     async createUser(data: CreateUserInput, request: FastifyRequest, reply: FastifyReply): Promise<void> {
             try {
                 const validatedData = CreateUserSchema.parse(data);
-                // request.log.info(validatedData);
+                const roleToCreate = data.role;
+                const requesterRole = request.user?.role;
+                if (roleToCreate === UserRole.ADMIN || roleToCreate === UserRole.MANAGER) {
+                    if (requesterRole !== UserRole.ADMIN) {
+                        return reply.status(403).send({
+                            error: "Insufficient permissions"
+                        });
+                    }
+                }
+
                 if (validatedData.phone_number < 1000000000) {
                     return reply.status(422).send({
                         error: "Phone number must be at least 10 digits"
